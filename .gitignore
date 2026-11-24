@@ -1,0 +1,14 @@
+# Local Supabase/browser configuration
+js/config.js
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local dependencies/build output
+node_modules/
+dist/
+.env
+.env.*

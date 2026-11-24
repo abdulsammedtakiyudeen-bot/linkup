@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1769e0">
+  <meta name="description" content="Linkup — Connect. Share. Discover.">
+  <title>Linkup — Connect. Share. Discover.</title>
+  <link rel="icon" href="assets/logo/linkup-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <section id="auth-view" class="auth-shell">
+    <div class="auth-brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">linkup</div>
+        <div class="brand-tagline">Connect. Share. Discover.</div>
+      </div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="tab active" data-auth-tab="login">Log in</button>
+        <button class="tab" data-auth-tab="signup">Create account</button>
+      </div>
+      <div id="login-panel">
+        <h1>Welcome back</h1>
+        <p class="muted">Log in to catch up with your community.</p>
+        <form id="login-form" class="form-stack">
+          <label>Email address<input id="login-email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+          <label>Password<input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="Your password"></label>
+          <button class="btn primary full" type="submit">Log in</button>
+        </form>
+      </div>
+      <div id="signup-panel" class="hidden">
+        <h1>Join Linkup</h1>
+        <p class="muted">Create an account and start connecting.</p>
+        <form id="signup-form" class="form-stack">
+          <label>Display name<input id="signup-name" maxlength="40" required placeholder="Your name"></label>
+          <label>Username<input id="signup-username" maxlength="24" pattern="[A-Za-z0-9_]+" required placeholder="yourname"></label>
+          <label>Email address<input id="signup-email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+          <label>Password<input id="signup-password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
+          <label class="check-label"><input id="signup-terms" type="checkbox" required> I agree to the <a href="#terms" data-page="terms">community rules and terms</a>.</label>
+          <button class="btn primary full" type="submit">Create account</button>
+        </form>
+        <p class="tiny muted">Use a real email address. Depending on your Supabase settings, you may need to confirm it before logging in.</p>
+      </div>
+      <div id="auth-notice" class="notice hidden"></div>
+    </div>
+    <p class="auth-footer">A welcoming space to share ideas and discover people.</p>
+  </section>
+
+  <div id="app-view" class="app hidden">
+    <header class="topbar">
+      <a class="brand" href="#" data-page="home" aria-label="Linkup home">
+        <span class="brand-mark small">L</span><span>linkup</span>
+      </a>
+      <div class="top-search"><span>⌕</span><input id="global-search" placeholder="Search people" aria-label="Search people"></div>
+      <div class="top-actions">
+        <button class="icon-btn" id="header-notifications" title="Notifications" aria-label="Notifications">♧<span id="notification-dot" class="dot hidden"></span></button>
+        <button class="avatar-button" id="header-profile" title="Your profile"><span id="header-avatar">U</span></button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar left-sidebar">
+        <div class="side-profile">
+          <div class="avatar large" id="sidebar-avatar">U</div>
+          <div><strong id="sidebar-name">Your profile</strong><span id="sidebar-handle" class="muted tiny">@username</span></div>
+        </div>
+        <nav class="nav-list" aria-label="Main navigation">
+          <button class="nav-item active" data-page="home"><span>⌂</span> Home</button>
+          <button class="nav-item" data-page="explore"><span>⌕</span> Explore</button>
+          <button class="nav-item" data-page="following"><span>♡</span> Following</button>
+          <button class="nav-item" data-page="notifications"><span>♧</span> Notifications</button>
+          <button class="nav-item" data-page="profile"><span>♙</span> My profile</button>
+          <button class="nav-item" data-page="settings"><span>⚙</span> Settings</button>
+        </nav>
+        <button id="sidebar-compose" class="btn primary full">＋ Create post</button>
+        <div class="sidebar-bottom"><a href="#about" data-page="about">About</a><a href="#privacy" data-page="privacy">Privacy</a><a href="#terms" data-page="terms">Terms</a><span>© <span id="year"></span> Linkup</span></div>
+      </aside>
+
+      <main id="main-content" class="main-content">
+        <section id="page-home" class="page">
+          <div class="page-heading"><div><p class="eyebrow">YOUR COMMUNITY</p><h1>Home feed</h1><p class="muted">The latest conversations, in order.</p></div></div>
+          <section class="composer card">
+            <div class="composer-top"><div class="avatar" id="composer-avatar">U</div><button id="composer-open" class="composer-placeholder">What would you like to share?</button></div>
+            <div class="composer-actions"><span class="muted tiny">Share a thought or a photo</span><button class="btn primary" id="composer-photo">＋ Photo / post</button></div>
+          </section>
+          <div id="feed-list" class="feed-list"><div class="loading">Loading the latest posts…</div></div>
+          <button id="load-more" class="btn secondary full hidden">Load more posts</button>
+        </section>
+
+        <section id="page-explore" class="page hidden">
+          <div class="page-heading"><div><p class="eyebrow">FIND YOUR PEOPLE</p><h1>Explore</h1><p class="muted">Discover public posts and people on Linkup.</p></div></div>
+          <div class="card search-card"><label for="people-search">Search by name or username</label><input id="people-search" class="input" placeholder="Try a name or @username"></div>
+          <div id="people-results" class="people-grid"></div>
+          <h2 class="section-title">Recent public posts</h2><div id="explore-feed" class="feed-list"></div>
+        </section>
+
+        <section id="page-following" class="page hidden">
+          <div class="page-heading"><div><p class="eyebrow">YOUR NETWORK</p><h1>Following</h1><p class="muted">Posts from people you follow.</p></div></div>
+          <div id="following-feed" class="feed-list"></div>
+        </section>
+
+        <section id="page-notifications" class="page hidden">
+          <div class="page-heading"><div><p class="eyebrow">STAY IN THE LOOP</p><h1>Notifications</h1><p class="muted">Recent activity on your account.</p></div><button id="mark-read" class="btn secondary">Mark all read</button></div>
+          <div id="notifications-list" class="card list-card"></div>
+        </section>
+
+        <section id="page-profile" class="page hidden">
+          <div class="page-heading"><div><p class="eyebrow">YOUR SPACE</p><h1>My profile</h1></div><button class="btn secondary" data-page="settings">Edit profile</button></div>
+          <div id="profile-view"></div>
+        </section>
+
+        <section id="page-user-profile" class="page hidden">
+          <button class="text-button" data-page="explore">← Back to Explore</button>
+          <div id="public-profile-view"></div>
+        </section>
+
+        <section id="page-settings" class="page hidden">
+          <div class="page-heading"><div><p class="eyebrow">YOUR ACCOUNT</p><h1>Settings</h1><p class="muted">Manage your profile and account preferences.</p></div></div>
+          <div class="card settings-card">
+            <h2>Edit profile</h2>
+            <form id="profile-form" class="form-stack">
+              <label>Display name<input id="edit-display-name" maxlength="40" required></label>
+              <label>Username<input id="edit-username" maxlength="24" pattern="[A-Za-z0-9_]+" required></label>
+              <label>Bio<textarea id="edit-bio" maxlength="160" rows="3" placeholder="A little about you"></textarea></label>
+              <label>Avatar image URL <input id="edit-avatar" type="url" placeholder="https://…"></label>
+              <label class="check-label"><input id="private-account" type="checkbox"> Make my account private</label>
+              <button class="btn primary" type="submit">Save changes</button>
+            </form>
+            <hr>
+            <h2>Account</h2>
+            <p class="muted tiny">You can sign out of this device at any time.</p>
+            <button id="logout-button" class="btn danger-outline">Log out</button>
+          </div>
+        </section>
+
+        <section id="page-about" class="page hidden static-page"><p class="eyebrow">ABOUT US</p><h1>About Linkup</h1><p>Linkup is a simple social space designed to help people connect, share ideas and discover new perspectives.</p><h2>Our aim</h2><p>Make it easier to have useful, respectful conversations in a welcoming online community.</p></section>
+        <section id="page-privacy" class="page hidden static-page"><p class="eyebrow">YOUR INFORMATION</p><h1>Privacy overview</h1><p>Linkup uses account information and content you choose to submit to operate the service. Do not publish sensitive personal information.</p><p>Before public launch, the operator must publish a complete privacy notice explaining data collection, retention, deletion requests, contact details and any third-party services used.</p></section>
+        <section id="page-terms" class="page hidden static-page"><p class="eyebrow">COMMUNITY EXPECTATIONS</p><h1>Terms & community rules</h1><ul><li>Be respectful. Harassment, threats and hateful content are not allowed.</li><li>Do not post private information about another person.</li><li>Do not impersonate others, spam, or upload content you do not have permission to share.</li><li>Use reporting and blocking tools when needed.</li><li>Linkup may remove content or restrict accounts that break the rules.</li></ul><p>This starter policy is not a substitute for legal review before a public launch.</p></section>
+      </main>
+
+      <aside class="sidebar right-sidebar">
+        <section class="card side-card"><div class="side-card-heading"><h3>People to discover</h3><button class="text-button" data-page="explore">See all</button></div><div id="suggestions-list"><p class="muted tiny">Finding people…</p></div></section>
+        <section class="card side-card community-card"><div class="mini-brand"><span class="brand-mark tiny-mark">L</span><strong>Linkup</strong></div><h3>Good connections start here.</h3><p class="muted tiny">Share thoughtfully. Be kind. Help make this community welcoming.</p><a href="#terms" data-page="terms">Community rules →</a></section>
+      </aside>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <button class="active" data-page="home"><span>⌂</span><small>Home</small></button>
+      <button data-page="explore"><span>⌕</span><small>Explore</small></button>
+      <button id="mobile-compose"><span class="plus-circle">＋</span><small>Post</small></button>
+      <button data-page="notifications"><span>♧</span><small>Alerts</small></button>
+      <button data-page="profile"><span>♙</span><small>Profile</small></button>
+    </nav>
+  </div>
+
+  <dialog id="post-dialog" class="modal">
+    <form id="post-form" method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">SHARE WITH LINKUP</p><h2>Create a post</h2></div><button type="button" class="close-btn" data-close="post-dialog" aria-label="Close">×</button></div>
+      <label for="post-content">What's on your mind?</label>
+      <textarea id="post-content" maxlength="2000" rows="5" placeholder="Write something…" required></textarea>
+      <label for="post-image">Photo URL (optional)</label><input id="post-image" type="url" placeholder="https://example.com/photo.jpg">
+      <p class="tiny muted">Only share photos you have permission to use. Upload-by-file can be added after Storage is configured.</p>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="post-dialog">Cancel</button><button class="btn primary" type="submit">Publish post</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="comment-dialog" class="modal">
+    <form id="comment-form" method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">CONVERSATION</p><h2>Comments</h2></div><button type="button" class="close-btn" data-close="comment-dialog" aria-label="Close">×</button></div>
+      <div id="comment-list" class="comment-list"></div>
+      <label for="comment-content">Add a comment</label><textarea id="comment-content" rows="2" maxlength="500" placeholder="Write a thoughtful comment…" required></textarea>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="comment-dialog">Close</button><button class="btn primary" type="submit">Comment</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="report-dialog" class="modal">
+    <form id="report-form" method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">HELP KEEP LINKUP SAFE</p><h2>Report content</h2></div><button type="button" class="close-btn" data-close="report-dialog" aria-label="Close">×</button></div>
+      <label for="report-reason">Why are you reporting this?</label>
+      <select id="report-reason" required><option value="">Choose a reason</option><option>Harassment or bullying</option><option>Spam or scam</option><option>Hateful or harmful content</option><option>Impersonation</option><option>Privacy concern</option><option>Other</option></select>
+      <label for="report-details">Additional details (optional)</label><textarea id="report-details" rows="3" maxlength="500"></textarea>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close="report-dialog">Cancel</button><button class="btn primary" type="submit">Submit report</button></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
